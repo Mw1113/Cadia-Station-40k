@@ -24,7 +24,8 @@
 	equip_to_slot_or_del(new /obj/item/clothing/gloves/ork, slot_gloves)
 	equip_to_slot_or_del(new /obj/item/clothing/head/soft/orkhat, slot_head)
 	equip_to_slot_or_del(new /obj/item/weapon/taperoll, slot_r_hand) //I'm just gonna stuff this in here. He needs this.
-	//there should only be one warboss
+	equip_to_slot_or_del(new /obj/item/device/flashlight/orklite, slot_r_store) //there should only be one warboss
+
 	playsound(loc, 'sound/voice/warboss.ogg', 75, 0)
 	for(var/mob/living/carbon/human/ork/warboss/Q in living_mob_list)
 		if(Q == src)		continue
@@ -64,7 +65,7 @@
 
 	set name = "Grow sum Gretchez! (250)" //Given that every gretchin is now potentially going to get a player eventually, worth raising the price.
 	set desc = "Throw all this stuff on da ground!."
-	set category = "ork"
+	set category = "Ork"
 
 	if(locate(/obj/structure/human/ork/bush) in get_turf(src))
 		src << "Theres already stuff here!."

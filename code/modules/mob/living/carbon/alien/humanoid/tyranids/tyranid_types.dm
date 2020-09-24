@@ -283,9 +283,18 @@ Zoanthropes
 			if(6)
 				src.verbs.Add(/mob/living/carbon/alien/humanoid/tyranid/zoanthropes/proc/psythrow)
 				src << "\red You can throw people telekinetically."
+				if (lowertext(usr.key) in tyranid)
+					src.verbs.Add(/mob/living/carbon/alien/humanoid/tyranid/proc/rename)
+					src << "\red You are now able to rename yourself. This should follow a normal naming scheme for Tyranid characters."
 		adjustToxLoss(-800)
 	else
 		src << "\red You need more biomass."
+
+/mob/living/carbon/alien/humanoid/tyranid/zoanthropes/Life()
+	..()
+	if(evol_stage >= 2)
+		src.see_invisible = SEE_INVISIBLE_OBSERVER_NOLIGHTING
+
 
 /*
 Warriors
@@ -391,6 +400,9 @@ Warriors
 			if(4)
 				src.firearmor += 5
 				src << "<b>You grow fireproofed scales!</b>"
+				if (lowertext(usr.key) in tyranid)
+					src.verbs.Add(/mob/living/carbon/alien/humanoid/tyranid/proc/rename)
+					src << "\red You are now able to rename yourself. This should follow a normal naming scheme for Tyranid characters."
 		adjustToxLoss(-400)
 	else
 		src << "\red You need more biomass."
@@ -408,14 +420,15 @@ Ravener
 	icon = 'icons/mob/tyranidslarge.dmi'
 	name = "ravener"
 	icon_state = "ravener"
-	maxHealth = 400
-	health = 400
+	maxHealth = 500
+	health = 500
 	layer = 5
 	ventcrawler = 0
 	status_flags = 0
 	luminosity = 3
 	brutearmor = 1
 	var/rending_claws = 0
+	var/speedmod = 1.1
 
 /mob/living/carbon/alien/humanoid/tyranid/ravener/adjustFireLoss(amount)
 	src.adjustToxLoss(-amount*4)
@@ -637,9 +650,17 @@ Ravener
 			if(5)
 				src.verbs.Add(/mob/living/carbon/alien/humanoid/tyranid/proc/regrowth)
 				src << "\red You gain the ability to regenerate off spare biomass."
+				if (lowertext(usr.key) in tyranid)
+					src.verbs.Add(/mob/living/carbon/alien/humanoid/tyranid/proc/rename)
+					src << "\red You are now able to rename yourself. This should follow a normal naming scheme for Tyranid characters."
 		adjustToxLoss(-1000)
 	else
 		src << "\red You need more biomass."
+
+/mob/living/carbon/alien/humanoid/tyranid/ravener/Life()
+	..()
+	if(evol_stage >= 2)
+		src.see_invisible = SEE_INVISIBLE_OBSERVER_NOLIGHTING
 
 /*
 Lictor
@@ -819,6 +840,9 @@ Lictor
 			if(7)
 				src.plasma_rate = 20
 				src << "\red Your harvest rate increases."
+				if (lowertext(usr.key) in tyranid)
+					src.verbs.Add(/mob/living/carbon/alien/humanoid/tyranid/proc/rename)
+					src << "\red You are now able to rename yourself. This should follow a normal naming scheme for Tyranid characters."
 		adjustToxLoss(-800)
 	else
 		src << "\red You need more biomass."
@@ -947,10 +971,10 @@ Hormagaunt
 	return
 
 /mob/living/carbon/alien/humanoid/tyranid/hormagaunt/proc/talons()
-	set name = "Scything Talons (50)"
+	set name = "Scything Talons (100)"
 	set desc = "Lash out in rapid succession at everyone nearby."
 	set category = "Alien"
-	if(powerc(50))
+	if(powerc(100))
 		playsound(loc, 'sound/weapons/slice.ogg', 25, 1, -1)
 		for(var/mob/living/carbon/human/C in oview(1))
 			visible_message("\red <B>[src] slashes [C] with scything talons!</B>")
@@ -959,9 +983,9 @@ Hormagaunt
 			var/armor_block = C.run_armor_check(affecting, "melee")
 			C.apply_damage(rand(15, 35), BRUTE, affecting, armor_block - 25)
 			new /obj/effect/gibspawner/blood(C.loc)
-			if(prob(50))
+			if(prob(25))
 				C.drop_item()
-			adjustToxLoss(-50)
+			adjustToxLoss(-100)
 	else
 		src << "\red You need more biomass."
 
@@ -1014,10 +1038,19 @@ Hormagaunt
 				src << "\red You adapt a venomous bite! The venom will make targets react badly to harvest weeds, keeping them away from the hive."
 			if(5)
 				src.verbs.Add(/mob/living/carbon/alien/humanoid/tyranid/proc/spikes, /mob/living/carbon/alien/humanoid/tyranid/proc/mine)
+				if (lowertext(usr.key) in tyranid)
+					src.verbs.Add(/mob/living/carbon/alien/humanoid/tyranid/proc/rename)
+					src << "\red You are now able to rename yourself. This should follow a normal naming scheme for Tyranid characters."
 				src << "\red You are now able to build spike defenses and spore mines."
 		adjustToxLoss(-800)
 	else
 		src << "\red You need more biomass."
+
+/mob/living/carbon/alien/humanoid/tyranid/hormagaunt/Life()
+	..()
+	if(evol_stage >= 2)
+		src.see_invisible = SEE_INVISIBLE_OBSERVER_NOLIGHTING
+
 
 /*
 Genestealer
@@ -1031,6 +1064,8 @@ Genestealer
 	health = 200
 	var/convert_range = 0
 	var/speedboost = 1
+	var/converting = 0
+	var/convertstun = 0
 
 /mob/living/carbon/alien/humanoid/tyranid/genestealer/movement_delay()
 	. = -speedboost
@@ -1051,37 +1086,95 @@ Genestealer
 			if(!istype(T))
 				src << "\red We only infect people!"
 				return
-			if(istype(T, /mob/living/carbon/human/whitelisted/))
+			if(istype(T, /mob/living/carbon/human/whitelisted/) && (!istype(T, /mob/living/carbon/human/whitelisted/eldar)))
 				src << "\red No... it is too difficult! We must find another."
 				return
 			if(iscultist(T))
 				src << "\red This one's mind is already too closely bonded to immaterial forces!"
 				return
-			src << "We jab [T]. They will become one of us in approximately two minutes."
+			if(converting)
+				src << "\red We are already converting a cultist."
+				return
+			if (convertstun)
+				src << "\ We are recovering so can't convert again yet."
+				return
+			if(T.mind.special_role == "Genestealer Cult Member")
+				src << "\red This one's mind already belongs to us."
+				return
+			adjustToxLoss(-50) //You won't spend biomass on an invalid target but will spend it regardless of succeeding against armour.
+
+			//Armour and augment defence against genestealer conversion. Unless nested, armour and augments will have a chance to stop conversion attempts. Maximum is 48% from augments and 50% from armour.
+			var/penchance = T.getarmor(null,"melee")/2 //Average melee armour halved.
+			src << "AO[penchance]"
+			if (T.getlimb(/obj/item/organ/limb/robot/chest)) // Adds 8% safety chance per limb so a fully augmented person gets 48%. More efficient way to check this then 6 if statements?
+				penchance += 8								 // Also, should augments be this important? Being made of metal should be major but perhaps armour should be more weighted as it's not as easy to max?
+			if (T.getlimb(/obj/item/organ/limb/robot/head))
+				penchance += 8
+			if (T.getlimb(/obj/item/organ/limb/robot/l_arm))
+				penchance += 8
+			if (T.getlimb(/obj/item/organ/limb/robot/r_arm))
+				penchance += 8
+			if (T.getlimb(/obj/item/organ/limb/robot/l_leg))
+				penchance += 8
+			if (T.getlimb(/obj/item/organ/limb/robot/r_leg))
+				penchance += 8
+			src << "AaA[penchance]"
+			penchance -= rand(1,100) //Roll a percentage and take it away from pen chance. If positive, the conversion is blocked.
+			if (T.buckled)  //If the target is buckled/nested, their armour doesn't matter. Allows for admech and other full conversions to be converted without a dozen attempts.
+				penchance = -1
+			src << "Chance[penchance]"
+			if (penchance >= 20 && rand(1,5) == 5) //If you fail by at least twenty, 20% chance to be stunned.
+				convertstun = 1
+				spawn(200)
+					convertstun = 0
+				src << "\red We critically fail to penetrate [T]'s armour and become stunned. We will need twenty seconds to recover."
+				visible_message("\red <B>[src] tries to jab [T] with its tongue but is stopped by [T]'s armour!</B>")
+				return
+			if (penchance >= 0)
+				convertstun = 1
+				spawn(10)
+					convertstun = 0
+				src << "\red We fail to penetrate [T]'s armour. We will need a second to recover before we can try again."
+				visible_message("\red <B>[src] tries to jab [T] with its tongue but is stopped by [T]'s armour!</B>")
+				return
+			converting=1 //Got through all checks that stop conversion so conversion begins.
+			src << "We jab [T]. We must keep them by us for 10 seconds to convert them."
 			visible_message("\red <B>[src] jabs [T] with its tongue!</B>")
 			T << "\red The [src] jabs you with its tongue!"
-			T.Paralyse(15)
-			spawn(1200)
-				T << "\red You are suddenly able to sense all the other tyranids on the outpost!"
-				T << "\red You are a member of the genestealer cult. Serve the tyranids at all costs."
+			T.Weaken(5)
+			spawn(0)
+				for(var/stage = 0, stage<=20, stage++)  //Must stay by them for 10 seconds. Hard to get someone if they're in a group as you'll be chased away. 20 stages so that it'll check frequently for the victim breaking free.
+					sleep(5)
+					if(prob(40))    //A lone target should be easy to capture. This could be reduced if nesting should be mandatory.
+						T.Weaken(5)
+					if(get_dist(get_turf(src),get_turf(T)) > convert_range)
+						src.visible_message("\red <b>The [src] withdraws its tongue from [T]!</b>")
+						converting = 0
+						return
+				src << "\red We convert [T]. They will now serve us loyally." //There isn't a delay after conversion is complete. Could be re-added but this saves having to nest someone after conversion.
+				T << "<font size='4' color='red'>You are suddenly able to sense all the Tyranids on the outpost! You can communicate to them through the hivemind by using the prefix :a in messages<b>!</b></font>"
+				T << "<font size='4' color='red'>As a member of the genestealer cult, you must serve and obey the Tyranids, but follow the genestealer that converted you above all else<b>!</b></font>"
+				converting = 0  //Still haven't managed to fix the old runtime error so this will let the genestealer convert by setting converting to 0 first.
 				T.alien_talk_understand = 1
 				T.mind.special_role = "Genestealer Cult Member"
 				spawn(10)
 					for(var/mob/living/C in world)
-						if(isalien(C) || (C.mind && C.mind.special_role == "Genestealer Cult Member"))
+						if(isalien(C) || (C.mind && C.mind.special_role == "Genestealer Cult Member"))   //Right now, this makes the icon appear for Nids but not for the cultists.
 							var/I = image('icons/mob/alien.dmi', loc = T, icon_state = "genestealer")
+							if (isnull(C.client))
+								src << "This is an error when the game tries to add the icon to a client that doesn't exist. The convert will be told that they are a cultist but will not see the icon."
+								src << C.client
 							C.client.images += I
-			adjustToxLoss(-50)
 		else
 			src << "\blue No targets in range!"
 	else
 		src << "\red You need more biomass."
 
 /mob/living/carbon/alien/humanoid/tyranid/genestealer/proc/talons()
-	set name = "Scything Talons (50)"
+	set name = "Scything Talons (100)"
 	set desc = "Lash out in rapid succession at everyone nearby."
 	set category = "Alien"
-	if(powerc(50))
+	if(powerc(100))
 		playsound(loc, 'sound/weapons/slice.ogg', 25, 1, -1)
 		for(var/mob/living/carbon/human/C in oview(1))
 			visible_message("\red <B>[src] slashes [C] with scything talons!</B>")
@@ -1095,7 +1188,7 @@ Genestealer
 				var/armor_block = C.run_armor_check(affecting, "melee")
 				C.apply_damage(rand(15, 45), BRUTE, affecting, armor_block - 35)
 				new /obj/effect/gibspawner/blood(C.loc)
-			adjustToxLoss(-50)
+			adjustToxLoss(-100)
 	else
 		src << "\red You need more biomass."
 
@@ -1160,6 +1253,9 @@ Genestealer
 				src.health += 100
 				src.maxHealth += 100
 				src << "\red You have evolved into a brood lord!"
+				if (lowertext(usr.key) in tyranid)
+					src.verbs.Add(/mob/living/carbon/alien/humanoid/tyranid/proc/rename)
+					src << "\red You are now able to rename yourself. This should follow a normal naming scheme for Tyranid characters."
 		adjustToxLoss(-800)
 	else
 		src << "\red You need more biomass."
@@ -1389,9 +1485,17 @@ Venomthropes
 				plasma_rate = 20
 				src << "<b>You evolve a venom cannon! Use shift+click to fire.</b>"
 				src.verbs.Add(/mob/living/carbon/alien/humanoid/tyranid/venomthropes/proc/venomshot)
+				if (lowertext(usr.key) in tyranid)
+					src.verbs.Add(/mob/living/carbon/alien/humanoid/tyranid/proc/rename)
+					src << "\red You are now able to rename yourself. This should follow a normal naming scheme for Tyranid characters."
 		adjustToxLoss(-500)
 	else
 		src << "\red You need more biomass."
+
+/mob/living/carbon/alien/humanoid/tyranid/venomthropes/Life()
+	..()
+	if(evol_stage >= 2)
+		src.see_invisible = SEE_INVISIBLE_OBSERVER_NOLIGHTING
 
 datum/reagent/toxin/venomthropes
 	name = "Tyranid Toxin"
@@ -1465,5 +1569,5 @@ datum/reagent/tyranid/on_mob_life(var/mob/living/carbon/M) //Pretty high damage 
 				H.drop_item()
 				H.Dizzy(5)
 				shake_camera(H, 10, 1)
-				H.reagents.remove_reagent(src.id, 0.05)
+		H.reagents.remove_reagent(src.id, 0.05) //Removed indentation so the chem will still be processed when not on weeds.
 	return

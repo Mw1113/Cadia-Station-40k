@@ -58,14 +58,14 @@
 
 /obj/item/device/radio/headset/headset_eng
 	name = "mechanicus headset"
-	desc = "When the engineers wish to chat like girls. To access the engineering channel, use :e. "
+	desc = "When the Adeptus Mechanicus wish to confer on toaster designs. To access the engineering channel, use :e. "
 	icon_state = "eng_headset"
 	item_state = "headset"
 	keyslot2 = new /obj/item/device/encryptionkey/headset_eng
 
 /obj/item/device/radio/headset/headset_rob
 	name = "cybernetica headset"
-	desc = "Made specifically for the roboticists, who cannot decide between departments. To access the engineering channel, use :e. For research, use :n."
+	desc = "Made specifically for the cybernetica acolytes, who work with science but are part of the Adeptus Mechanicus. To access the engineering channel, use :e. For research, use :n."
 	icon_state = "rob_headset"
 	item_state = "headset"
 	keyslot2 = new /obj/item/device/encryptionkey/headset_rob
@@ -84,9 +84,9 @@
 	item_state = "headset"
 	keyslot2 = new /obj/item/device/encryptionkey/headset_sci
 
-/obj/item/device/radio/headset/headset_medsci
-	name = "medicus research radio headset"
-	desc = "A headset that is a result of the mating between medical and science. To access the medical channel, use :m. For science, use :n."
+/obj/item/device/radio/headset/headset_medsci  //Only used by Genetor so safe to rename.
+	name = "genetor radio headset"
+	desc = "A headset for the genetor, an adeptus mechanicus closely tied to medical and science. Channels are as follows: : e - engineering, :m - medical, :n - science."
 	icon_state = "medsci_headset"
 	item_state = "headset"
 	keyslot2 = new /obj/item/device/encryptionkey/headset_medsci
@@ -99,7 +99,7 @@
 	keyslot2 = new /obj/item/device/encryptionkey/headset_com
 
 /obj/item/device/radio/headset/heads/captain
-	name = "\proper Lord General Headset"
+	name = "\proper Rogue Trader Headset"
 	desc = "The headset of the boss. Channels are as follows: :c - command, :s - imperial guard, :e - engineering, :u - supply, :v - service, :m - medical, :n - science."
 	icon_state = "com_headset"
 	item_state = "headset"
@@ -113,7 +113,7 @@
 	keyslot2 = new /obj/item/device/encryptionkey/heads/rd
 
 /obj/item/device/radio/headset/heads/hos
-	name = "\proper Comissar Headset"
+	name = "\proper Commissar Headset"
 	desc = "The headset of the man in charge of keeping order and protecting the station. To access the imperial guard channel, use :s. For command, use :c."
 	icon_state = "com_headset"
 	item_state = "headset"
@@ -121,7 +121,7 @@
 
 /obj/item/device/radio/headset/heads/ce
 	name = "\proper Magos Headset"
-	desc = "The headset of the guy in charge of keeping the station powered and undamaged. To access the engineering channel, use :e. For command, use :c."
+	desc = "The headset of the tech-priest in charge of keeping the station powered and undamaged. To access the engineering channel, use :e. For command, use :c."
 	icon_state = "com_headset"
 	item_state = "headset"
 	keyslot2 = new /obj/item/device/encryptionkey/heads/ce
@@ -141,8 +141,8 @@
 	keyslot2 = new /obj/item/device/encryptionkey/heads/hop
 
 /obj/item/device/radio/headset/headset_cargo
-	name = "munitorium headset"
-	desc = "A headset used by the QM and his slaves. To access the supply channel, use :u."
+	name = "munitorum headset"
+	desc = "A headset used by the Munitorum. To access the supply channel, use :u."
 	icon_state = "cargo_headset"
 	item_state = "headset"
 	keyslot2 = new /obj/item/device/encryptionkey/headset_cargo

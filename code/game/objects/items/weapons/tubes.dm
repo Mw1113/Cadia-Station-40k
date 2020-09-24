@@ -41,7 +41,7 @@ Aluminum Tube
 
 /obj/item/aluminumtube3													//stage 2
 	name = "Device"
-	desc = "A prototype mechadendrite. At this stage it can accept a Cable Layer, an AutoCannon or a Hydraulic Clamp."
+	desc = "A prototype mechadendrite. At this stage it can accept a Cable Layer, an AutoGun, Hydraulic Clamp or a Syringe Gun."
 	icon = 'icons/obj/pipes/regular.dmi'
 	icon_state = "21"
 
@@ -74,6 +74,17 @@ Aluminum Tube
 		if(do_after(user, 60))
 			qdel(W)
 			new /obj/item/aluminumtube4/AC(user.loc)
+			qdel(src)
+			return
+		else
+			user.visible_message("<span class='notice'>[user] stops unexpectedly.</span>", "<span class='notice'>Your focus is interupted and you abandon the device.</span>")
+
+	if(istype(W,/obj/item/mecha_parts/mecha_equipment/tool/syringe_gun))
+		user << "You begin intergrating the syringe gun."
+		playsound(src.loc, "sound/items/welder2.ogg", 50, 0, 4)
+		if(do_after(user, 60))
+			qdel(W)
+			new /obj/item/aluminumtube4/surgical(user.loc)
 			qdel(src)
 			return
 		else
@@ -163,9 +174,10 @@ It's a series of tubes!
 		user.visible_message("<span class='notice'>[user] throws [M] with ease!</span>", "<span class='notice'>You throw [M] with your clamp!</span>")
 
 	if(istype(A,/turf/)||istype(A,/obj/structure/)||istype(A,/obj/machinery/door/)||istype(A,/obj/effect/fake_floor))
-		A.ex_act(2)
-		playsound(loc, 'sound/weapons/smash.ogg', 50, 1, -1)
-		user.visible_message("<span class='notice'>[user] destroys the [A] with a metal clamp!</span>", "<span class='notice'>You made short work of that [A] with your clamp!</span>")
+		if (!istype(A, /turf/unsimulated) && !istype(A, /obj/structure/caves_entrance) && !istype(A, /obj/structure/necron_entrance)) //Should hopefully stop marines breaking into the crisis support console. Any unexpected side effects? Should also include poddoor but that would break other stuff.
+			A.ex_act(2)  //The above also stops the clamp from destroying the entrance/exit to the necron tomb.
+			playsound(loc, 'sound/weapons/smash.ogg', 50, 1, -1)
+			user.visible_message("<span class='notice'>[user] destroys the [A] with a metal clamp!</span>", "<span class='notice'>You made short work of that [A] with your clamp!</span>")
 	..()
 
 /obj/item/weapon/melee/clamp/dropped()
